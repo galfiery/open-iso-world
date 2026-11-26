@@ -119,12 +119,26 @@ The server validates in two steps: the frame against the envelope, then the payl
 - Adding a message or an optional field is not breaking.
 - `minSupported` goes up when the server stops handling an old version.
 
+## Generated Code
+
+`pnpm protocol:gen` reads the schemas and `version.json` and writes two outputs:
+
+| Output                                                   | Used by        | What it holds                                                                                                                                       |
+| -------------------------------------------------------- | -------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `protocol/generated/index.ts`                            | client, bot    | One interface per payload (`MoveToPayload`), the `ClientMessages` and `ServerMessages` maps, the envelope types and the version constants           |
+| `server/net/src/main/java/io/openisoworld/net/protocol/` | server (`net`) | One record per payload and shared type, the sealed `ClientPayload` and `ServerPayload` interfaces, `MessageTypes`, `ProtocolVersion` and `Envelope` |
+
+Each payload is named after its schema's `title` plus `Payload`. The Java records check required fields and limits in their constructors and copy lists, so a record that exists is always valid. The generator refuses schema keywords it cannot translate, instead of ignoring them.
+
+The generated files are committed and start with a "Do not edit" notice. `pnpm protocol:check` generates the code in memory and compares it with the files on disk: it fails if one is changed, missing or no longer generated. The CI planned for v0.1 will run it, so that a schema change without regeneration cannot be merged. `pnpm --filter protocol test` tests the generator and checks every schema against valid and invalid examples.
+
 ## Adding a Message
 
 1. Add or change the schema in `protocol/schemas`, named after its type in kebab-case (type `playerJoined`, file `player-joined.schema.json`), with an `x-message` block, a `title` in PascalCase and a `description`.
 2. Reuse the types of `common.schema.json` instead of redefining them.
 3. Bump `protocol/version.json` if the change breaks older clients.
-4. Regenerate the code and implement both sides in the same change, with tests. Never edit generated code by hand.
+4. Add valid and invalid examples for the schema in `protocol/schemas/schemas.test.ts`.
+5. Run `pnpm protocol:gen`, commit the generated code and implement both sides in the same change, with tests. Never edit generated code by hand.
 
 ## Related
 
