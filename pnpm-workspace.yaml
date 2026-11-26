@@ -4,3 +4,8 @@ packages:
   - examples/bot
 
 engineStrict: true
+
+# Versions shared by several packages; reference them with "catalog:".
+catalog:
+  typescript: ~6.0.3
+  "@types/node": ^26.6.10

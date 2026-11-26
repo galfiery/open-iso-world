@@ -10,5 +10,9 @@
   "scripts": {
     "protocol:gen": "pnpm --filter protocol gen",
     "protocol:check": "pnpm --filter protocol check"
+  },
+  "packageManager": "pnpm@12.23.0",
+  "devDependencies": {
+    "prettier": "^3.10.1"
   }
 }
