@@ -41,6 +41,11 @@ server/
 client/src/
   net/             # WebSocket and REST
   engine/          # Isometric math and PixiJS rendering
+    iso/           # Pure isometric math: grid <-> screen, no PixiJS
+    scene/         # The single depth-sorted layer for avatars and furniture
+    sprites/       # Avatar, furniture and tile views
+    camera/        # Integer zoom, pan and roundPixels
+    input/         # Click to tile
   game/            # Game state, pure TypeScript
   ui/              # React: room list, room, chat
 assets/            # CC0 placeholder art and asset specs
