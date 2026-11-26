@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "hello.schema.json",
+  "x-message": { "type": "hello", "direction": "client" },
+  "title": "Hello",
+  "description": "First message from the client after connecting. Declares the protocol version it speaks.",
+  "type": "object",
+  "required": ["protocol_version"],
+  "additionalProperties": false,
+  "properties": {
+    "protocol_version": {
+      "description": "Protocol version of the client. The server accepts it between min_supported and current.",
+      "type": "integer",
+      "minimum": 1
+    },
+    "client_version": {
+      "description": "Optional client build version, for logs and debugging only. It never decides whether the client is accepted.",
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 32
+    }
+  }
+}

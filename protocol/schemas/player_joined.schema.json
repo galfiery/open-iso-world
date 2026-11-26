@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "player_joined.schema.json",
+  "x-message": { "type": "player_joined", "direction": "server" },
+  "title": "PlayerJoined",
+  "description": "A player entered the room.",
+  "type": "object",
+  "required": ["player"],
+  "additionalProperties": false,
+  "properties": {
+    "player": {
+      "$ref": "common.schema.json#/$defs/player"
+    }
+  }
+}
