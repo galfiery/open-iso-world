@@ -3,6 +3,9 @@
   "private": true,
   "description": "Message schemas (JSON Schema) and the TypeScript/Java code generator.",
   "type": "module",
+  "exports": {
+    ".": "./generated/index.ts"
+  },
   "scripts": {
     "gen": "node generator/generate.ts",
     "check": "node -e \"console.log('protocol: check not implemented yet')\"",

@@ -9,5 +9,5 @@
     "allowImportingTsExtensions": true,
     "types": ["node"]
   },
-  "include": ["generator"]
+  "include": ["generator", "generated"]
 }
