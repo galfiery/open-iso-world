@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "room_state.schema.json",
+  "x-message": { "type": "room_state", "direction": "server" },
+  "title": "RoomState",
+  "description": "Full snapshot of the room, sent right after welcome.",
+  "type": "object",
+  "required": ["room_id", "width", "height", "blocked", "players"],
+  "additionalProperties": false,
+  "properties": {
+    "room_id": {
+      "description": "Opaque room identifier.",
+      "type": "string",
+      "minLength": 1
+    },
+    "width": {
+      "description": "Number of columns. Valid x values go from 0 to width - 1.",
+      "type": "integer",
+      "minimum": 1
+    },
+    "height": {
+      "description": "Number of rows. Valid y values go from 0 to height - 1.",
+      "type": "integer",
+      "minimum": 1
+    },
+    "blocked": {
+      "description": "Tiles nobody can walk on.",
+      "type": "array",
+      "items": {
+        "$ref": "common.schema.json#/$defs/tile"
+      }
+    },
+    "players": {
+      "description": "Players in the room, including the receiving one.",
+      "type": "array",
+      "items": {
+        "$ref": "common.schema.json#/$defs/player"
+      }
+    }
+  }
+}

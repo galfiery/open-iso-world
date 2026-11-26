@@ -96,12 +96,19 @@ Shared types:
 
 How the schemas are organised in `protocol/`:
 
-- **One schema file per message.** Each one repeats the three envelope fields, with `type` fixed to the message name, so every schema reads on its own. A generic envelope schema lets the server check any incoming frame before it knows the type.
+- **One schema file per message, describing its payload.** A small metadata block at the top, `x-message`, names the message `type` and its `direction` (who sends it: `client` or `server`).
+- **One envelope schema.** It defines `{ type, seq, payload }` once, so the server can check any incoming frame before it knows the type, then validate the payload against the schema that `x-message` links to that type.
 - **Shared types** live in one common schema.
-- **Direction is explicit.** Two union schemas list what the client may send and what the server may send.
 - **Schemas are closed** (`additionalProperties: false`). The server rejects any field it doesn't expect.
 
-**Versioning.** The protocol version is a single integer, starting at 1, defined in one file in `protocol/`. It only goes up for a breaking change, and adding a new message doesn't bump it. `hello` accepts any version ≥ 1 on purpose: a client with the wrong version still gets a clear error instead of a rejected message.
+**Versioning.** Protocol versions are integers, starting at 1. One file in `protocol/` defines two of them:
+
+- `current` is the version the server and the client speak today.
+- `min_supported` is the oldest version the server still accepts.
+
+The server accepts any `hello` whose `protocol_version` lies between `min_supported` and `current`, and answers anything else with `unsupported_protocol_version`. `current` only goes up for a breaking change, and adding a new message doesn't bump it. `min_supported` goes up when the server stops handling an old version. Today both are 1.
+
+`hello` accepts any version ≥ 1 on purpose: a client with the wrong version still gets a clear error instead of a rejected message.
 
 ## Server
 

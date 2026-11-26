@@ -9,7 +9,7 @@ Out of scope: shop, inventory, economy, avatar skins.
 A single room where players walk on a tile grid and see each other move.
 
 - [x] Monorepo: pnpm workspace, Gradle modules, PostgreSQL in Docker Compose
-- [ ] Protocol: `{ "type", "seq", "payload" }` envelope and JSON Schemas for `hello` (with protocol version), `welcome`, `room_state`, `move_to`, `path`, `player_joined`, `player_left`, `error`
+- [x] Protocol: `{ "type", "seq", "payload" }` envelope and JSON Schemas for `hello` (with protocol version), `welcome`, `room_state`, `move_to`, `path`, `player_joined`, `player_left`, `error`
 - [ ] Protocol generator: TypeScript types and Java records, `pnpm protocol:gen` and `pnpm protocol:check`
 - [ ] Server core: room grid with blocked tiles, A* pathfinding, ~10 Hz tick loop with a command queue, batched events per tick
 - [ ] Server net: native WebSocket endpoint, single-use connection ticket issued by REST (anonymous guests use a ticket too)
