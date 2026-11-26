@@ -84,6 +84,7 @@ docker compose up -d db                        # PostgreSQL only
 pnpm install
 pnpm protocol:gen                              # regenerate code from protocol/
 pnpm protocol:check                            # fail if generated code is stale
+pnpm --filter protocol test                    # generator and schema tests
 cd server && ./gradlew :app:bootRun            # server on :8080
 pnpm server:dev                                # same, from the root on any OS
 cd server && ./gradlew test                    # JUnit, ArchUnit, Testcontainers
