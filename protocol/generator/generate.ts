@@ -1,7 +1,15 @@
 // Generates TypeScript types and Java records from protocol/schemas.
+// This is the entry point: it reads and checks the schemas, then writes what typescript.ts and java.ts produce.
 // Run it with "pnpm protocol:gen"; "pnpm protocol:check" fails when the generated code is stale.
-import { mkdirSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
+import {
+  mkdirSync,
+  readdirSync,
+  readFileSync,
+  rmSync,
+  writeFileSync,
+} from "node:fs";
 import { join } from "node:path";
+import { JAVA_DIR, javaFiles } from "./java.ts";
 import { typescriptFile } from "./typescript.ts";
 
 export const PROTOCOL_DIR = join(import.meta.dirname, "..");
@@ -92,6 +100,23 @@ export function payloadName(message: Message): string {
   return `${message.schema.title}Payload`;
 }
 
+/** The shared types of common.schema.json, by name. */
+export function readCommonTypes(): Record<string, Schema> {
+  const common = readJson<{ $defs: Record<string, Schema> }>(
+    join(SCHEMAS_DIR, "common.schema.json"),
+  );
+  return common.$defs;
+}
+
+/** Replaces the whole content of a directory that only the generator writes. */
+function replaceDirectory(dir: string, files: Map<string, string>): void {
+  rmSync(dir, { recursive: true, force: true });
+  mkdirSync(dir, { recursive: true });
+  for (const [name, content] of files) {
+    writeFileSync(join(dir, name), content);
+  }
+}
+
 async function main(): Promise<void> {
   try {
     const version = readVersion();
@@ -110,6 +135,7 @@ async function main(): Promise<void> {
       join(TS_DIR, "index.ts"),
       await typescriptFile(version, messages),
     );
+    replaceDirectory(JAVA_DIR, javaFiles(version, messages, readCommonTypes()));
   } catch (error) {
     console.error(error instanceof Error ? error.message : error);
     process.exitCode = 1;
