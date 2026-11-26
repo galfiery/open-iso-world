@@ -4,8 +4,9 @@
   "description": "Message schemas (JSON Schema) and the TypeScript/Java code generator.",
   "type": "module",
   "scripts": {
-    "gen": "node -e \"console.log('protocol: generator not implemented yet')\"",
-    "check": "node -e \"console.log('protocol: check not implemented yet')\""
+    "gen": "node generator/generate.ts",
+    "check": "node -e \"console.log('protocol: check not implemented yet')\"",
+    "typecheck": "tsc"
   },
   "devDependencies": {
     "json-schema-to-typescript": "^16.0.0",
