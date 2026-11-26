@@ -9,7 +9,8 @@
   },
   "scripts": {
     "protocol:gen": "pnpm --filter protocol gen",
-    "protocol:check": "pnpm --filter protocol check"
+    "protocol:check": "pnpm --filter protocol check",
+    "server:dev": "node scripts/gradlew.mjs :app:bootRun"
   },
   "packageManager": "pnpm@12.23.0",
   "devDependencies": {

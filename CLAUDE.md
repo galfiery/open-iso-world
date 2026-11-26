@@ -51,6 +51,7 @@ client/src/
 assets/            # CC0 placeholder art and asset specs
 examples/bot/      # Headless client that joins a room, walks and chats
 docs/              # Documentation and ADRs
+scripts/           # Repository tooling, such as the cross-platform Gradle runner
 ```
 
 Follow the existing structure when adding new files.
@@ -84,6 +85,7 @@ pnpm install
 pnpm protocol:gen                              # regenerate code from protocol/
 pnpm protocol:check                            # fail if generated code is stale
 cd server && ./gradlew :app:bootRun            # server on :8080
+pnpm server:dev                                # same, from the root on any OS
 cd server && ./gradlew test                    # JUnit, ArchUnit, Testcontainers
 pnpm --filter open-iso-world-client dev        # client on :5173
 pnpm --filter open-iso-world-client lint
