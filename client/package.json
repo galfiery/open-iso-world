@@ -1,5 +1,5 @@
 {
-  "name": "client",
+  "name": "open-iso-world-client",
   "private": true,
   "type": "module",
   "scripts": {

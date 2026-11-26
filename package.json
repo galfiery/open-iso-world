@@ -1,7 +1,7 @@
 {
   "name": "open-iso-world",
   "private": true,
-  "description": "Minimal real-time multiplayer isometric rooms: a readable full-stack example.",
+  "description": "A minimal, open source reference for real-time multiplayer isometric rooms.",
   "license": "Apache-2.0",
   "engines": {
     "node": ">=26",
