@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "envelope.schema.json",
+  "title": "Envelope",
+  "description": "Envelope shared by every message. The payload is validated against the schema whose x-message has this type.",
+  "type": "object",
+  "required": ["type", "seq", "payload"],
+  "additionalProperties": false,
+  "properties": {
+    "type": {
+      "description": "Message type, in snake_case.",
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_]*$"
+    },
+    "seq": { "$ref": "common.schema.json#/$defs/seq" },
+    "payload": {
+      "description": "Message-specific content.",
+      "type": "object"
+    }
+  }
+}
