@@ -1,0 +1,14 @@
+{
+  "name": "open-iso-world",
+  "private": true,
+  "description": "Minimal real-time multiplayer isometric rooms: a readable full-stack example.",
+  "license": "Apache-2.0",
+  "engines": {
+    "node": ">=26",
+    "pnpm": ">=12"
+  },
+  "scripts": {
+    "protocol:gen": "pnpm --filter protocol gen",
+    "protocol:check": "pnpm --filter protocol check"
+  }
+}

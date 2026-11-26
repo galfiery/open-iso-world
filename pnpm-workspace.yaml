@@ -1,0 +1,6 @@
+packages:
+  - protocol
+  - client
+  - examples/bot
+
+engineStrict: true

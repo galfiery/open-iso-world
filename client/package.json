@@ -1,0 +1,15 @@
+{
+  "name": "client",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node -e \"console.log('client: not set up yet')\"",
+    "lint": "node -e \"console.log('client: not set up yet')\"",
+    "test": "node -e \"console.log('client: not set up yet')\"",
+    "build": "node -e \"console.log('client: not set up yet')\"",
+    "e2e": "node -e \"console.log('client: not set up yet')\""
+  },
+  "dependencies": {
+    "protocol": "workspace:*"
+  }
+}
