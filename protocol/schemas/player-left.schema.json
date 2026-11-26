@@ -1,15 +1,15 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "player_left.schema.json",
-  "x-message": { "type": "player_left", "direction": "server" },
+  "$id": "player-left.schema.json",
+  "x-message": { "type": "playerLeft", "direction": "server" },
   "title": "PlayerLeft",
   "description": "A player left the room.",
   "type": "object",
-  "required": ["player_id"],
+  "required": ["playerId"],
   "additionalProperties": false,
   "properties": {
-    "player_id": {
-      "$ref": "common.schema.json#/$defs/player_id"
+    "playerId": {
+      "$ref": "common.schema.json#/$defs/playerId"
     }
   }
 }

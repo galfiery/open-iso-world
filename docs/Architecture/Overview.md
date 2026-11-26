@@ -34,10 +34,10 @@ Three rules shape everything else:
 
 ```text
 1. Player clicks a tile        engine/input turns the click into (x, y)
-2. Client sends intention      { "type": "move_to", "seq": 12, "payload": { "x": 4, "y": 7 } }
+2. Client sends intention      { "type": "moveTo", "seq": 12, "payload": { "x": 4, "y": 7 } }
 3. Server queues the command   net puts it in the room's command queue
 4. Next tick (~100 ms)         core validates the tile, rate-limits, runs A* around blocked tiles
-5. Server broadcasts the path  { "type": "path", "payload": { "player_id": "...", "tiles": [{ "x": 3, "y": 7 }, { "x": 4, "y": 7 }] } }
+5. Server broadcasts the path  { "type": "path", "payload": { "playerId": "...", "tiles": [{ "x": 3, "y": 7 }, { "x": 4, "y": 7 }] } }
 6. Every client animates it    game interpolates tile by tile, engine draws it depth-sorted
 ```
 
@@ -47,22 +47,22 @@ The server sends the **whole path once**, not a position every tick. The first t
 
 ```text
 POST /api/tickets   →  { "ticket": "…" }        (single use, expires in seconds)
-WS   /ws?ticket=…   →  hello { protocol_version } → welcome + room_state
+WS   /ws?ticket=…   →  hello { protocolVersion } → welcome + roomState
 ```
 
 Every player gets a ticket first, guests included. Today the server issues it to an anonymous guest. From v0.3 it can also issue one to a logged-in account. The WebSocket side doesn't change, and access tokens never appear in URLs or logs. The ticket is part of the REST API, not of the message protocol.
 
-If the client declares a protocol version the server doesn't support, the server answers with an `error` (`unsupported_protocol_version`) and closes the connection.
+If the client declares a protocol version the server doesn't support, the server answers with an `error` (`unsupportedProtocolVersion`) and closes the connection.
 
 ## Protocol
 
 Every message shares one envelope:
 
 ```json
-{ "type": "move_to", "seq": 12, "payload": { "x": 4, "y": 7 } }
+{ "type": "moveTo", "seq": 12, "payload": { "x": 4, "y": 7 } }
 ```
 
-- `type` names the message, in snake_case.
+- `type` names the message, in camelCase.
 - `seq` counts the sender's own messages on this connection, starting at 1. Each side keeps its own counter.
 - `payload` is specific to each message.
 
@@ -70,29 +70,29 @@ Every message shares one envelope:
 
 ```json
 [
-  { "type": "player_joined", "seq": 7, "payload": { "player": { "player_id": "p-2", "position": { "x": 1, "y": 1 } } } },
-  { "type": "path", "seq": 8, "payload": { "player_id": "p-1", "tiles": [{ "x": 3, "y": 7 }, { "x": 4, "y": 7 }] } }
+  { "type": "playerJoined", "seq": 7, "payload": { "player": { "playerId": "p-2", "position": { "x": 1, "y": 1 } } } },
+  { "type": "path", "seq": 8, "payload": { "playerId": "p-1", "tiles": [{ "x": 3, "y": 7 }, { "x": 4, "y": 7 }] } }
 ]
 ```
 
-| Message         | Direction       | Payload                                                       |
-|-----------------|-----------------|---------------------------------------------------------------|
-| `hello`         | client → server | `protocol_version`                                            |
-| `move_to`       | client → server | `x`, `y`                                                      |
-| `welcome`       | server → client | `player_id` (the receiving player's own id)                   |
-| `room_state`    | server → client | `room_id`, `width`, `height`, `blocked` tiles, `players`      |
-| `path`          | server → client | `player_id`, `tiles` (starting with the current tile)         |
-| `player_joined` | server → client | `player`                                                      |
-| `player_left`   | server → client | `player_id`                                                   |
-| `error`         | server → client | `code`, `message`, optional `ref_seq`                         |
+| Message        | Direction       | Payload                                                 |
+|----------------|-----------------|---------------------------------------------------------|
+| `hello`        | client → server | `protocolVersion`                                       |
+| `moveTo`       | client → server | `x`, `y`                                                |
+| `welcome`      | server → client | `playerId` (the receiving player's own id)              |
+| `roomState`    | server → client | `roomId`, `width`, `height`, `blocked` tiles, `players` |
+| `path`         | server → client | `playerId`, `tiles` (starting with the current tile)    |
+| `playerJoined` | server → client | `player`                                                |
+| `playerLeft`   | server → client | `playerId`                                              |
+| `error`        | server → client | `code`, `message`, optional `refSeq`                    |
 
 Shared types:
 
 - A **tile** is always `{ "x": …, "y": … }`, with integers ≥ 0. Whether a tile lies inside the room is checked by the server, because it depends on the room.
-- A **player** is `{ player_id, position, path? }`. The optional `path` holds the tiles still to walk, so someone who just joined sees who is moving.
-- A **player_id** is an opaque string that clients never interpret.
+- A **player** is `{ playerId, position, path? }`. The optional `path` holds the tiles still to walk, so someone who just joined sees who is moving.
+- A **playerId** is an opaque string that clients never interpret.
 
-`error.ref_seq` points to the client message that caused the error. The first codes are `unsupported_protocol_version`, `invalid_message`, `invalid_tile` and `rate_limited`.
+`error.refSeq` points to the client message that caused the error. The first codes are `unsupportedProtocolVersion`, `invalidMessage`, `invalidTile` and `rateLimited`.
 
 How the schemas are organised in `protocol/`:
 
@@ -104,9 +104,9 @@ How the schemas are organised in `protocol/`:
 **Versioning.** Protocol versions are integers, starting at 1. One file in `protocol/` defines two of them:
 
 - `current` is the version the server and the client speak today.
-- `min_supported` is the oldest version the server still accepts.
+- `minSupported` is the oldest version the server still accepts.
 
-The server accepts any `hello` whose `protocol_version` lies between `min_supported` and `current`, and answers anything else with `unsupported_protocol_version`. `current` only goes up for a breaking change, and adding a new message doesn't bump it. `min_supported` goes up when the server stops handling an old version. Today both are 1.
+The server accepts any `hello` whose `protocolVersion` lies between `minSupported` and `current`, and answers anything else with `unsupportedProtocolVersion`. `current` only goes up for a breaking change, and adding a new message doesn't bump it. `minSupported` goes up when the server stops handling an old version. Today both are 1.
 
 `hello` accepts any version ≥ 1 on purpose: a client with the wrong version still gets a clear error instead of a rejected message.
 

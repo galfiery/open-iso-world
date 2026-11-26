@@ -1,14 +1,14 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "room_state.schema.json",
-  "x-message": { "type": "room_state", "direction": "server" },
+  "$id": "room-state.schema.json",
+  "x-message": { "type": "roomState", "direction": "server" },
   "title": "RoomState",
   "description": "Full snapshot of the room, sent right after welcome.",
   "type": "object",
-  "required": ["room_id", "width", "height", "blocked", "players"],
+  "required": ["roomId", "width", "height", "blocked", "players"],
   "additionalProperties": false,
   "properties": {
-    "room_id": {
+    "roomId": {
       "description": "Opaque room identifier.",
       "type": "string",
       "minLength": 1

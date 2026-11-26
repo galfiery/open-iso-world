@@ -3,13 +3,19 @@
   "private": true,
   "description": "Message schemas (JSON Schema) and the TypeScript/Java code generator.",
   "type": "module",
+  "exports": {
+    ".": "./generated/index.ts"
+  },
   "scripts": {
-    "gen": "node -e \"console.log('protocol: generator not implemented yet')\"",
-    "check": "node -e \"console.log('protocol: check not implemented yet')\""
+    "gen": "node generator/generate.ts",
+    "check": "node generator/generate.ts --check",
+    "typecheck": "tsc",
+    "test": "node --test \"generator/*.test.ts\" \"schemas/*.test.ts\""
   },
   "devDependencies": {
-    "json-schema-to-typescript": "^16.0.0",
     "@types/node": "catalog:",
+    "ajv": "^8.20.0",
+    "json-schema-to-typescript": "^16.0.0",
     "typescript": "catalog:"
   }
 }

@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "player_joined.schema.json",
-  "x-message": { "type": "player_joined", "direction": "server" },
+  "$id": "player-joined.schema.json",
+  "x-message": { "type": "playerJoined", "direction": "server" },
   "title": "PlayerJoined",
   "description": "A player entered the room.",
   "type": "object",

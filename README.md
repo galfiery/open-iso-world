@@ -24,9 +24,10 @@ What exists today:
 
 - a pnpm workspace with the protocol, the client and an example bot, and a Gradle build with the four server modules;
 - PostgreSQL 18 in Docker Compose, and a Spring Boot application that connects to it;
-- the message protocol: one envelope and JSON Schemas for the eight messages of v0.1.
+- the message protocol: one envelope and JSON Schemas for the eight messages of v0.1;
+- the protocol generator, which turns the schemas into TypeScript types and Java records (`pnpm protocol:gen`, `pnpm protocol:check`).
 
-What v0.1 will add, one step at a time: the code generator for the protocol, the room engine with A* pathfinding and a ~10 Hz tick, the WebSocket endpoint with single-use tickets, the isometric renderer and click to walk. Later milestones bring chat and multiple rooms (v0.2), accounts and rooms in the database (v0.3), a public demo (v0.4) and furniture to sit on (v0.5).
+What v0.1 will add, one step at a time: the room engine with A* pathfinding and a ~10 Hz tick, the WebSocket endpoint with single-use tickets, the isometric renderer and click to walk. Later milestones bring chat and multiple rooms (v0.2), accounts and rooms in the database (v0.3), a public demo (v0.4) and furniture to sit on (v0.5).
 
 Out of scope: shop, inventory, economy and avatar skins.
 
@@ -71,20 +72,20 @@ Details: [Architecture Overview](docs/Architecture/Overview.md).
 
 1. The client gets a single-use ticket over REST.
 2. It opens `/ws?ticket=…`.
-3. It sends `hello` with its protocol version; the server answers `welcome` with the player's id, then `room_state` with the room and the players in it.
-4. From then on the client sends `move_to`, and the server sends each tick's events (`path`, `player_joined`, `player_left`) as one frame.
+3. It sends `hello` with its protocol version; the server answers `welcome` with the player's id, then `roomState` with the room and the players in it.
+4. From then on the client sends `moveTo`, and the server sends each tick's events (`path`, `playerJoined`, `playerLeft`) as one frame.
 
 ### Message Format
 
 ```json
-{ "type": "move_to", "seq": 12, "payload": { "x": 4, "y": 7 } }
+{ "type": "moveTo", "seq": 12, "payload": { "x": 4, "y": 7 } }
 ```
 
-| Field     | Type               | Meaning                                                    |
-| --------- | ------------------ | ---------------------------------------------------------- |
-| `type`    | string, snake_case | The message type, one of the schemas in `protocol/schemas` |
-| `seq`     | integer ≥ 1        | Counts the sender's own messages on this connection        |
-| `payload` | object             | The message body, as its schema defines it                 |
+| Field     | Type              | Meaning                                                    |
+| --------- | ----------------- | ---------------------------------------------------------- |
+| `type`    | string, camelCase | The message type, one of the schemas in `protocol/schemas` |
+| `seq`     | integer ≥ 1       | Counts the sender's own messages on this connection        |
+| `payload` | object            | The message body, as its schema defines it                 |
 
 Full reference: [Realtime Protocol](docs/Realtime-Protocol/Overview.md).
 
@@ -105,9 +106,12 @@ pnpm install
 
 pnpm server:dev                      # server on :8080, from the root on any OS
 cd server && ./gradlew test          # JUnit, ArchUnit, Testcontainers
+
+pnpm protocol:gen                    # regenerate code from protocol/schemas
+pnpm protocol:check                  # fail if the generated code is stale
 ```
 
-The client, the bot and the protocol generator have their scripts in place (`pnpm --filter open-iso-world-client dev`, `pnpm --filter bot start`, `pnpm protocol:gen`), but they only print a placeholder until their roadmap step is done.
+The client and the bot have their scripts in place (`pnpm --filter open-iso-world-client dev`, `pnpm --filter bot start`), but they only print a placeholder until their roadmap step is done.
 
 ### Configuration
 
@@ -161,11 +165,11 @@ All pages are listed on the [documentation home](docs/Home.md).
 
 ## Compatibility
 
-Client and server are released together, and the handshake keeps them in step: a client outside the server's supported protocol range is refused with `error` `unsupported_protocol_version`.
+Client and server are released together, and the handshake keeps them in step: a client outside the server's supported protocol range is refused with `error` `unsupportedProtocolVersion`.
 
 ### Requirements
 
-- Protocol version 1 (`protocol/version.json`: `current` 1, `min_supported` 1)
+- Protocol version 1 (`protocol/version.json`: `current` 1, `minSupported` 1)
 - JSON text frames over WebSocket
 - A current desktop browser with WebGL, for PixiJS
 - PostgreSQL 18

@@ -9,7 +9,7 @@
       "type": "integer",
       "minimum": 1
     },
-    "player_id": {
+    "playerId": {
       "description": "Opaque player identifier chosen by the server. Clients never interpret it.",
       "type": "string",
       "minLength": 1
@@ -27,10 +27,10 @@
     "player": {
       "description": "A player in a room. path holds the tiles still to walk, if the player is moving.",
       "type": "object",
-      "required": ["player_id", "position"],
+      "required": ["playerId", "position"],
       "additionalProperties": false,
       "properties": {
-        "player_id": { "$ref": "#/$defs/player_id" },
+        "playerId": { "$ref": "#/$defs/playerId" },
         "position": { "$ref": "#/$defs/tile" },
         "path": {
           "type": "array",

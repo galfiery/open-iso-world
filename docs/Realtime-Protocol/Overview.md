@@ -7,9 +7,9 @@ Every message that travels over the WebSocket shares one envelope and is defined
 ```text
 POST /api/tickets   ──►  ticket (single use, expires in seconds)
 GET  /ws?ticket=…   ──►  ticket consumed, session opened
-hello   { protocol_version, client_version? }
-welcome { player_id }
-room_state { … }
+hello   { protocolVersion, clientVersion? }
+welcome { playerId }
+roomState { … }
 ```
 
 The ticket is part of the REST API, not of this protocol. Every player gets one, guests included, so access tokens never appear in URLs or logs.
@@ -17,14 +17,16 @@ The ticket is part of the REST API, not of this protocol. Every player gets one,
 ## Envelope
 
 ```json
-{ "type": "move_to", "seq": 12, "payload": { "x": 4, "y": 7 } }
+{ "type": "moveTo", "seq": 12, "payload": { "x": 4, "y": 7 } }
 ```
 
-| Field     | Type               | Meaning                                                                              |
-| --------- | ------------------ | ------------------------------------------------------------------------------------ |
-| `type`    | string, snake_case | The message type                                                                     |
-| `seq`     | integer ≥ 1        | Counts the sender's own messages on this connection; each side keeps its own counter |
-| `payload` | object             | The body, as the message's schema defines it                                         |
+| Field     | Type              | Meaning                                                                              |
+| --------- | ----------------- | ------------------------------------------------------------------------------------ |
+| `type`    | string, camelCase | The message type                                                                     |
+| `seq`     | integer ≥ 1       | Counts the sender's own messages on this connection; each side keeps its own counter |
+| `payload` | object            | The body, as the message's schema defines it                                         |
+
+Every name in the protocol is camelCase: message types (`moveTo`), field names (`playerId`) and enum values such as error codes (`invalidTile`). It is the convention of TypeScript and Java, so a field has the same name in the schema, in the JSON and in the generated code. Schema files are the exception: they are files, not protocol names, so they use kebab-case like other file names (`move-to.schema.json` for `moveTo`).
 
 ## Frames
 
@@ -34,17 +36,17 @@ The ticket is part of the REST API, not of this protocol. Every player gets one,
 ```json
 [
   {
-    "type": "player_joined",
+    "type": "playerJoined",
     "seq": 7,
     "payload": {
-      "player": { "player_id": "p-2", "position": { "x": 1, "y": 1 } }
+      "player": { "playerId": "p-2", "position": { "x": 1, "y": 1 } }
     }
   },
   {
     "type": "path",
     "seq": 8,
     "payload": {
-      "player_id": "p-1",
+      "playerId": "p-1",
       "tiles": [
         { "x": 3, "y": 7 },
         { "x": 4, "y": 7 }
@@ -60,40 +62,40 @@ Fields marked * are required.
 
 ### Client to Server
 
-| Type      | Payload                                                                                 | Answer                                                                                             |
-| --------- | --------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------- |
-| `hello`   | `protocol_version`* (integer ≥ 1), `client_version` (1 to 32 characters, for logs only) | `welcome` then `room_state`, or `error` `unsupported_protocol_version` and the connection closes   |
-| `move_to` | `x`_, `y`_ (a tile)                                                                     | None; everyone in the room gets `path`, or the sender gets `error` `invalid_tile` / `rate_limited` |
+| Type     | Payload                                                                               | Answer                                                                                           |
+| -------- | ------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------ |
+| `hello`  | `protocolVersion`* (integer ≥ 1), `clientVersion` (1 to 32 characters, for logs only) | `welcome` then `roomState`, or `error` `unsupportedProtocolVersion` and the connection closes    |
+| `moveTo` | `x`_, `y`_ (a tile)                                                                   | None; everyone in the room gets `path`, or the sender gets `error` `invalidTile` / `rateLimited` |
 
 ### Server to Client
 
-| Type            | Payload                                                         | When                                                                                                  |
-| --------------- | --------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
-| `welcome`       | `player_id`*                                                    | After a valid `hello`; the receiving player's own id                                                  |
-| `room_state`    | `room_id`_, `width`_, `height`_, `blocked`_ (tiles), `players`* | Right after `welcome`: the whole room, the receiving player included                                  |
-| `path`          | `player_id`_, `tiles`_ (at least one)                           | A player starts walking; the first tile is the starting one, a single tile means standing still there |
-| `player_joined` | `player`*                                                       | A player entered the room                                                                             |
-| `player_left`   | `player_id`*                                                    | A player left the room                                                                                |
-| `error`         | `code`_, `message`_ (1 to 200 characters), `ref_seq`            | A refusal; `ref_seq` is the `seq` of the client message it answers, when there is one                 |
+| Type           | Payload                                                        | When                                                                                                  |
+| -------------- | -------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
+| `welcome`      | `playerId`*                                                    | After a valid `hello`; the receiving player's own id                                                  |
+| `roomState`    | `roomId`_, `width`_, `height`_, `blocked`_ (tiles), `players`* | Right after `welcome`: the whole room, the receiving player included                                  |
+| `path`         | `playerId`_, `tiles`_ (at least one)                           | A player starts walking; the first tile is the starting one, a single tile means standing still there |
+| `playerJoined` | `player`*                                                      | A player entered the room                                                                             |
+| `playerLeft`   | `playerId`*                                                    | A player left the room                                                                                |
+| `error`        | `code`_, `message`_ (1 to 200 characters), `refSeq`            | A refusal; `refSeq` is the `seq` of the client message it answers, when there is one                  |
 
 ### Shared Types
 
-| Type      | Shape                                                                                       |
-| --------- | ------------------------------------------------------------------------------------------- |
-| tile      | `{ x, y }`, integers ≥ 0; the server checks that it lies inside the room and is not blocked |
-| player    | `player_id`_, `position`_ (a tile), `path` (the tiles still to walk, when moving)           |
-| player_id | An opaque, non-empty string; clients never interpret it                                     |
+| Type     | Shape                                                                                       |
+| -------- | ------------------------------------------------------------------------------------------- |
+| tile     | `{ x, y }`, integers ≥ 0; the server checks that it lies inside the room and is not blocked |
+| player   | `playerId`_, `position`_ (a tile), `path` (the tiles still to walk, when moving)            |
+| playerId | An opaque, non-empty string; clients never interpret it                                     |
 
 Coordinates are always grid tiles. Isometric or screen coordinates never appear in the protocol.
 
 ### Error Codes
 
-| Code                           | Meaning                                                                     |
-| ------------------------------ | --------------------------------------------------------------------------- |
-| `unsupported_protocol_version` | The `hello` version is outside the range the server accepts                 |
-| `invalid_message`              | The frame or its payload does not match the schemas, or the type is unknown |
-| `invalid_tile`                 | The tile is outside the room or blocked                                     |
-| `rate_limited`                 | Too many commands; about 5 moves per second are allowed                     |
+| Code                         | Meaning                                                                     |
+| ---------------------------- | --------------------------------------------------------------------------- |
+| `unsupportedProtocolVersion` | The `hello` version is outside the range the server accepts                 |
+| `invalidMessage`             | The frame or its payload does not match the schemas, or the type is unknown |
+| `invalidTile`                | The tile is outside the room or blocked                                     |
+| `rateLimited`                | Too many commands; about 5 moves per second are allowed                     |
 
 Clients act on `code`; `message` is a short English text for humans and logs.
 
@@ -102,7 +104,7 @@ Clients act on `code`; `message` is a short English text for humans and logs.
 Each file in `protocol/schemas` describes the **payload** of one message, except `envelope.schema.json` (the envelope) and `common.schema.json` (the shared types). A metadata block at the top says which message it is and who sends it:
 
 ```json
-"x-message": { "type": "move_to", "direction": "client" }
+"x-message": { "type": "moveTo", "direction": "client" }
 ```
 
 The server validates in two steps: the frame against the envelope, then the payload against the schema whose `x-message.type` matches. All schemas are closed (`additionalProperties: false`), so an unexpected field is refused.
@@ -111,18 +113,32 @@ The server validates in two steps: the frame against the envelope, then the payl
 
 ## Versioning
 
-`protocol/version.json` holds `current` (1) and `min_supported` (1). The server accepts a `hello` whose `protocol_version` lies between the two.
+`protocol/version.json` holds `current` (1) and `minSupported` (1). The server accepts a `hello` whose `protocolVersion` lies between the two.
 
 - A breaking change bumps `current`: removing or renaming a field or a message, or making a field required.
 - Adding a message or an optional field is not breaking.
-- `min_supported` goes up when the server stops handling an old version.
+- `minSupported` goes up when the server stops handling an old version.
+
+## Generated Code
+
+`pnpm protocol:gen` reads the schemas and `version.json` and writes two outputs:
+
+| Output                                                   | Used by        | What it holds                                                                                                                                       |
+| -------------------------------------------------------- | -------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `protocol/generated/index.ts`                            | client, bot    | One interface per payload (`MoveToPayload`), the `ClientMessages` and `ServerMessages` maps, the envelope types and the version constants           |
+| `server/net/src/main/java/io/openisoworld/net/protocol/` | server (`net`) | One record per payload and shared type, the sealed `ClientPayload` and `ServerPayload` interfaces, `MessageTypes`, `ProtocolVersion` and `Envelope` |
+
+Each payload is named after its schema's `title` plus `Payload`. The Java records check required fields and limits in their constructors and copy lists, so a record that exists is always valid. The generator refuses schema keywords it cannot translate, instead of ignoring them.
+
+The generated files are committed and start with a "Do not edit" notice. `pnpm protocol:check` generates the code in memory and compares it with the files on disk: it fails if one is changed, missing or no longer generated. The CI planned for v0.1 will run it, so that a schema change without regeneration cannot be merged. `pnpm --filter protocol test` tests the generator and checks every schema against valid and invalid examples.
 
 ## Adding a Message
 
-1. Add or change the schema in `protocol/schemas`, with an `x-message` block, a `title` in PascalCase and a `description`.
+1. Add or change the schema in `protocol/schemas`, named after its type in kebab-case (type `playerJoined`, file `player-joined.schema.json`), with an `x-message` block, a `title` in PascalCase and a `description`.
 2. Reuse the types of `common.schema.json` instead of redefining them.
 3. Bump `protocol/version.json` if the change breaks older clients.
-4. Regenerate the code and implement both sides in the same change, with tests. Never edit generated code by hand.
+4. Add valid and invalid examples for the schema in `protocol/schemas/schemas.test.ts`.
+5. Run `pnpm protocol:gen`, commit the generated code and implement both sides in the same change, with tests. Never edit generated code by hand.
 
 ## Related
 

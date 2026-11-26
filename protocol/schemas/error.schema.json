@@ -12,10 +12,10 @@
       "description": "Machine-readable reason.",
       "type": "string",
       "enum": [
-        "unsupported_protocol_version",
-        "invalid_message",
-        "invalid_tile",
-        "rate_limited"
+        "unsupportedProtocolVersion",
+        "invalidMessage",
+        "invalidTile",
+        "rateLimited"
       ]
     },
     "message": {
@@ -24,7 +24,7 @@
       "minLength": 1,
       "maxLength": 200
     },
-    "ref_seq": {
+    "refSeq": {
       "description": "seq of the client message that caused the error, when there is one.",
       "$ref": "common.schema.json#/$defs/seq"
     }
