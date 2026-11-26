@@ -103,7 +103,7 @@ Use the existing scripts and Gradle tasks whenever possible.
 - TypeScript strict mode; prefer explicit types over `any`.
 - Java: packages lowercase and singular, classes named by role (`RoomManager`, `RoomController`).
 - React components in PascalCase, one per file; other TypeScript modules in camelCase.
-- Protocol message types, field names and enum values in camelCase, with schema files named `<type>.schema.json`; tables and columns in snake_case; migrations as `V<number>__<description>.sql`.
+- Protocol message types, field names and enum values in camelCase, with schema files named after the type in kebab-case (`player-joined.schema.json`); tables and columns in snake_case; migrations as `V<number>__<description>.sql`.
 - Keep functions small and files short: this is an example project and should read easily.
 - Unit tests sit next to the file they test.
 

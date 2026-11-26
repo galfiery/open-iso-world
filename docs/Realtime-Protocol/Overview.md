@@ -26,7 +26,7 @@ The ticket is part of the REST API, not of this protocol. Every player gets one,
 | `seq`     | integer ≥ 1       | Counts the sender's own messages on this connection; each side keeps its own counter |
 | `payload` | object            | The body, as the message's schema defines it                                         |
 
-Every name in the protocol is camelCase: message types (`moveTo`), field names (`playerId`) and enum values such as error codes (`invalidTile`). It is the convention of TypeScript and Java, so a field has the same name in the schema, in the JSON and in the generated code.
+Every name in the protocol is camelCase: message types (`moveTo`), field names (`playerId`) and enum values such as error codes (`invalidTile`). It is the convention of TypeScript and Java, so a field has the same name in the schema, in the JSON and in the generated code. Schema files are the exception: they are files, not protocol names, so they use kebab-case like other file names (`move-to.schema.json` for `moveTo`).
 
 ## Frames
 
@@ -121,7 +121,7 @@ The server validates in two steps: the frame against the envelope, then the payl
 
 ## Adding a Message
 
-1. Add or change the schema in `protocol/schemas`, named `<type>.schema.json` with the type in camelCase, with an `x-message` block, a `title` in PascalCase and a `description`.
+1. Add or change the schema in `protocol/schemas`, named after its type in kebab-case (type `playerJoined`, file `player-joined.schema.json`), with an `x-message` block, a `title` in PascalCase and a `description`.
 2. Reuse the types of `common.schema.json` instead of redefining them.
 3. Bump `protocol/version.json` if the change breaks older clients.
 4. Regenerate the code and implement both sides in the same change, with tests. Never edit generated code by hand.

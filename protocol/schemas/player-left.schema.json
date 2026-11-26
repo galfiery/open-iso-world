@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "playerLeft.schema.json",
+  "$id": "player-left.schema.json",
   "x-message": { "type": "playerLeft", "direction": "server" },
   "title": "PlayerLeft",
   "description": "A player left the room.",

@@ -59,6 +59,11 @@ export function readVersion(): Version {
   return version;
 }
 
+/** The file name form of a message type: playerJoined becomes player-joined. */
+export function kebabCase(type: string): string {
+  return type.replace(/[A-Z]/g, (letter) => `-${letter.toLowerCase()}`);
+}
+
 /** Checks the x-message block of one schema file and turns it into a Message. */
 export function toMessage(file: string, schema: Schema): Message {
   const meta = schema["x-message"];
@@ -68,8 +73,9 @@ export function toMessage(file: string, schema: Schema): Message {
   if (!/^[a-z][a-zA-Z0-9]*$/.test(meta.type)) {
     throw new Error(`${file}: type "${meta.type}" is not camelCase`);
   }
-  if (file !== `${meta.type}.schema.json`) {
-    throw new Error(`${file}: expected the file name ${meta.type}.schema.json`);
+  const expected = `${kebabCase(meta.type)}.schema.json`;
+  if (file !== expected) {
+    throw new Error(`${file}: expected the file name ${expected}`);
   }
   if (meta.direction !== "client" && meta.direction !== "server") {
     throw new Error(`${file}: direction must be "client" or "server"`);

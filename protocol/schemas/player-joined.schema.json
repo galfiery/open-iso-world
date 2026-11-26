@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "playerJoined.schema.json",
+  "$id": "player-joined.schema.json",
   "x-message": { "type": "playerJoined", "direction": "server" },
   "title": "PlayerJoined",
   "description": "A player entered the room.",

@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "moveTo.schema.json",
+  "$id": "move-to.schema.json",
   "x-message": { "type": "moveTo", "direction": "client" },
   "title": "MoveTo",
   "description": "The player wants to walk to a tile. The server validates it and answers with a path.",
