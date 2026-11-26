@@ -1,0 +1,4 @@
+# Generated code keeps LF line endings on every OS, so "pnpm protocol:check"
+# compares the same bytes everywhere.
+protocol/generated/** text eol=lf
+server/net/src/main/java/io/openisoworld/net/protocol/** text eol=lf

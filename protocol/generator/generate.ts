@@ -2,17 +2,19 @@
 // This is the entry point: it reads and checks the schemas, then writes what typescript.ts and java.ts produce.
 // Run it with "pnpm protocol:gen"; "pnpm protocol:check" fails when the generated code is stale.
 import {
+  existsSync,
   mkdirSync,
   readdirSync,
   readFileSync,
   rmSync,
   writeFileSync,
 } from "node:fs";
-import { join } from "node:path";
+import { join, relative } from "node:path";
 import { JAVA_DIR, javaFiles } from "./java.ts";
 import { typescriptFile } from "./typescript.ts";
 
 export const PROTOCOL_DIR = join(import.meta.dirname, "..");
+const REPO_DIR = join(PROTOCOL_DIR, "..");
 export const SCHEMAS_DIR = join(PROTOCOL_DIR, "schemas");
 const TS_DIR = join(PROTOCOL_DIR, "generated");
 export const NOTICE =
@@ -123,25 +125,84 @@ function replaceDirectory(dir: string, files: Map<string, string>): void {
   }
 }
 
+/** What differs between a generated directory on disk and what the generator would write. */
+export function compareDirectory(
+  dir: string,
+  files: Map<string, string>,
+): string[] {
+  const shown = (name: string): string =>
+    relative(REPO_DIR, join(dir, name)).replaceAll("\\", "/");
+  const problems: string[] = [];
+  for (const [name, content] of files) {
+    const path = join(dir, name);
+    if (!existsSync(path)) {
+      problems.push(`missing: ${shown(name)}`);
+    } else if (
+      readFileSync(path, "utf8").replaceAll("\r\n", "\n") !== content
+    ) {
+      problems.push(`changed: ${shown(name)}`);
+    }
+  }
+  const onDisk = existsSync(dir) ? readdirSync(dir).sort() : [];
+  for (const name of onDisk) {
+    if (!files.has(name)) {
+      problems.push(`not generated: ${shown(name)}`);
+    }
+  }
+  return problems;
+}
+
+function printSummary(version: Version, messages: Message[]): void {
+  console.log(
+    `Protocol version ${version.current} (min supported ${version.minSupported})`,
+  );
+  for (const direction of ["client", "server"] as const) {
+    const types = byDirection(messages, direction).map(
+      (message) => message.type,
+    );
+    console.log(`${direction}: ${types.join(", ")}`);
+  }
+}
+
+/** Every generated directory, with the files the generator writes in it. */
+async function generate(
+  version: Version,
+  messages: Message[],
+): Promise<Map<string, Map<string, string>>> {
+  const typescript = await typescriptFile(version, messages);
+  return new Map([
+    [TS_DIR, new Map([["index.ts", typescript]])],
+    [JAVA_DIR, javaFiles(version, messages, readCommonTypes())],
+  ]);
+}
+
+/** Writes the generated code, or with --check only compares it with the files on disk. */
 async function main(): Promise<void> {
   try {
     const version = readVersion();
     const messages = readMessages();
-    console.log(
-      `Protocol version ${version.current} (min supported ${version.minSupported})`,
-    );
-    for (const direction of ["client", "server"] as const) {
-      const types = byDirection(messages, direction).map(
-        (message) => message.type,
-      );
-      console.log(`${direction}: ${types.join(", ")}`);
+    const outputs = await generate(version, messages);
+    if (!process.argv.includes("--check")) {
+      for (const [dir, files] of outputs) {
+        replaceDirectory(dir, files);
+      }
+      printSummary(version, messages);
+      return;
     }
-    mkdirSync(TS_DIR, { recursive: true });
-    writeFileSync(
-      join(TS_DIR, "index.ts"),
-      await typescriptFile(version, messages),
+    const problems = [...outputs].flatMap(([dir, files]) =>
+      compareDirectory(dir, files),
     );
-    replaceDirectory(JAVA_DIR, javaFiles(version, messages, readCommonTypes()));
+    if (problems.length === 0) {
+      console.log("Generated code is up to date.");
+      return;
+    }
+    console.error(
+      'Generated code is out of date. Run "pnpm protocol:gen" and commit the result.',
+    );
+    for (const problem of problems) {
+      console.error(`  ${problem}`);
+    }
+    process.exitCode = 1;
   } catch (error) {
     console.error(error instanceof Error ? error.message : error);
     process.exitCode = 1;

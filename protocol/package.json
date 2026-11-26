@@ -8,7 +8,7 @@
   },
   "scripts": {
     "gen": "node generator/generate.ts",
-    "check": "node -e \"console.log('protocol: check not implemented yet')\"",
+    "check": "node generator/generate.ts --check",
     "typecheck": "tsc"
   },
   "devDependencies": {
