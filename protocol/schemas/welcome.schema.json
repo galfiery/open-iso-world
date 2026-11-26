@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "welcome.schema.json",
+  "x-message": { "type": "welcome", "direction": "server" },
+  "title": "Welcome",
+  "description": "Sent once after a valid hello. Tells the client its own player id.",
+  "type": "object",
+  "required": ["player_id"],
+  "additionalProperties": false,
+  "properties": {
+    "player_id": {
+      "$ref": "common.schema.json#/$defs/player_id"
+    }
+  }
+}
