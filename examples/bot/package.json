@@ -1,0 +1,16 @@
+{
+  "name": "bot",
+  "private": true,
+  "description": "Headless client that joins a room, walks and chats.",
+  "type": "module",
+  "scripts": {
+    "start": "node -e \"console.log('bot: not implemented yet')\""
+  },
+  "dependencies": {
+    "protocol": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "typescript": "catalog:"
+  }
+}

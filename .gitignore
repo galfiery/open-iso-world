@@ -1,0 +1,21 @@
+# Node
+node_modules/
+dist/
+coverage/
+client/playwright-report/
+client/test-results/
+
+# Gradle / Java
+server/.gradle/
+server/**/build/
+*.class
+
+# Environment (never commit secrets)
+.env
+.env.*
+!.env.example
+
+# Editors and OS
+.idea/
+.vscode/
+.DS_Store

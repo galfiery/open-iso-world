@@ -1,0 +1,15 @@
+{
+  "name": "protocol",
+  "private": true,
+  "description": "Message schemas (JSON Schema) and the TypeScript/Java code generator.",
+  "type": "module",
+  "scripts": {
+    "gen": "node -e \"console.log('protocol: generator not implemented yet')\"",
+    "check": "node -e \"console.log('protocol: check not implemented yet')\""
+  },
+  "devDependencies": {
+    "json-schema-to-typescript": "^16.0.0",
+    "@types/node": "catalog:",
+    "typescript": "catalog:"
+  }
+}
