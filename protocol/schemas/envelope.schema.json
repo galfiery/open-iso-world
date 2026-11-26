@@ -8,9 +8,9 @@
   "additionalProperties": false,
   "properties": {
     "type": {
-      "description": "Message type, in snake_case.",
+      "description": "Message type, in camelCase.",
       "type": "string",
-      "pattern": "^[a-z][a-z0-9_]*$"
+      "pattern": "^[a-z][a-zA-Z0-9]*$"
     },
     "seq": { "$ref": "common.schema.json#/$defs/seq" },
     "payload": {

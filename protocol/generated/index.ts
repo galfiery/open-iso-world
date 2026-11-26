@@ -12,20 +12,20 @@ export interface Protocol {
  */
 export interface ClientMessages {
   hello: HelloPayload;
-  move_to: MoveToPayload;
+  moveTo: MoveToPayload;
 }
 /**
  * First message from the client after connecting. Declares the protocol version it speaks.
  */
 export interface HelloPayload {
   /**
-   * Protocol version of the client. The server accepts it between min_supported and current.
+   * Protocol version of the client. The server accepts it between minSupported and current.
    */
-  protocol_version: number;
+  protocolVersion: number;
   /**
    * Optional client build version, for logs and debugging only. It never decides whether the client is accepted.
    */
-  client_version?: string;
+  clientVersion?: string;
 }
 /**
  * The player wants to walk to a tile. The server validates it and answers with a path.
@@ -40,9 +40,9 @@ export interface MoveToPayload {
 export interface ServerMessages {
   error: ErrorPayload;
   path: PathPayload;
-  player_joined: PlayerJoinedPayload;
-  player_left: PlayerLeftPayload;
-  room_state: RoomStatePayload;
+  playerJoined: PlayerJoinedPayload;
+  playerLeft: PlayerLeftPayload;
+  roomState: RoomStatePayload;
   welcome: WelcomePayload;
 }
 /**
@@ -52,7 +52,7 @@ export interface ErrorPayload {
   /**
    * Machine-readable reason.
    */
-  code: "unsupported_protocol_version" | "invalid_message" | "invalid_tile" | "rate_limited";
+  code: "unsupportedProtocolVersion" | "invalidMessage" | "invalidTile" | "rateLimited";
   /**
    * Short explanation in English, for humans and logs.
    */
@@ -60,7 +60,7 @@ export interface ErrorPayload {
   /**
    * seq of the client message that caused the error, when there is one.
    */
-  ref_seq?: number;
+  refSeq?: number;
 }
 /**
  * The whole path a player will walk. The first tile is where the player starts.
@@ -69,7 +69,7 @@ export interface PathPayload {
   /**
    * Opaque player identifier chosen by the server. Clients never interpret it.
    */
-  player_id: string;
+  playerId: string;
   /**
    * Tiles in walking order, starting with the current one. A single tile means the player stands still there.
    *
@@ -97,7 +97,7 @@ export interface Player {
   /**
    * Opaque player identifier chosen by the server. Clients never interpret it.
    */
-  player_id: string;
+  playerId: string;
   position: Tile;
   path?: Tile[];
 }
@@ -108,7 +108,7 @@ export interface PlayerLeftPayload {
   /**
    * Opaque player identifier chosen by the server. Clients never interpret it.
    */
-  player_id: string;
+  playerId: string;
 }
 /**
  * Full snapshot of the room, sent right after welcome.
@@ -117,7 +117,7 @@ export interface RoomStatePayload {
   /**
    * Opaque room identifier.
    */
-  room_id: string;
+  roomId: string;
   /**
    * Number of columns. Valid x values go from 0 to width - 1.
    */
@@ -142,7 +142,7 @@ export interface WelcomePayload {
   /**
    * Opaque player identifier chosen by the server. Clients never interpret it.
    */
-  player_id: string;
+  playerId: string;
 }
 
 /** Protocol version this code speaks. */

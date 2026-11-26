@@ -71,20 +71,20 @@ Details: [Architecture Overview](docs/Architecture/Overview.md).
 
 1. The client gets a single-use ticket over REST.
 2. It opens `/ws?ticket=…`.
-3. It sends `hello` with its protocol version; the server answers `welcome` with the player's id, then `room_state` with the room and the players in it.
-4. From then on the client sends `move_to`, and the server sends each tick's events (`path`, `player_joined`, `player_left`) as one frame.
+3. It sends `hello` with its protocol version; the server answers `welcome` with the player's id, then `roomState` with the room and the players in it.
+4. From then on the client sends `moveTo`, and the server sends each tick's events (`path`, `playerJoined`, `playerLeft`) as one frame.
 
 ### Message Format
 
 ```json
-{ "type": "move_to", "seq": 12, "payload": { "x": 4, "y": 7 } }
+{ "type": "moveTo", "seq": 12, "payload": { "x": 4, "y": 7 } }
 ```
 
-| Field     | Type               | Meaning                                                    |
-| --------- | ------------------ | ---------------------------------------------------------- |
-| `type`    | string, snake_case | The message type, one of the schemas in `protocol/schemas` |
-| `seq`     | integer ≥ 1        | Counts the sender's own messages on this connection        |
-| `payload` | object             | The message body, as its schema defines it                 |
+| Field     | Type              | Meaning                                                    |
+| --------- | ----------------- | ---------------------------------------------------------- |
+| `type`    | string, camelCase | The message type, one of the schemas in `protocol/schemas` |
+| `seq`     | integer ≥ 1       | Counts the sender's own messages on this connection        |
+| `payload` | object            | The message body, as its schema defines it                 |
 
 Full reference: [Realtime Protocol](docs/Realtime-Protocol/Overview.md).
 
@@ -161,11 +161,11 @@ All pages are listed on the [documentation home](docs/Home.md).
 
 ## Compatibility
 
-Client and server are released together, and the handshake keeps them in step: a client outside the server's supported protocol range is refused with `error` `unsupported_protocol_version`.
+Client and server are released together, and the handshake keeps them in step: a client outside the server's supported protocol range is refused with `error` `unsupportedProtocolVersion`.
 
 ### Requirements
 
-- Protocol version 1 (`protocol/version.json`: `current` 1, `min_supported` 1)
+- Protocol version 1 (`protocol/version.json`: `current` 1, `minSupported` 1)
 - JSON text frames over WebSocket
 - A current desktop browser with WebGL, for PixiJS
 - PostgreSQL 18

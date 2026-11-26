@@ -5,11 +5,11 @@
   "title": "Path",
   "description": "The whole path a player will walk. The first tile is where the player starts.",
   "type": "object",
-  "required": ["player_id", "tiles"],
+  "required": ["playerId", "tiles"],
   "additionalProperties": false,
   "properties": {
-    "player_id": {
-      "$ref": "common.schema.json#/$defs/player_id"
+    "playerId": {
+      "$ref": "common.schema.json#/$defs/playerId"
     },
     "tiles": {
       "description": "Tiles in walking order, starting with the current one. A single tile means the player stands still there.",

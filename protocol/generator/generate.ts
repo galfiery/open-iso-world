@@ -29,24 +29,24 @@ export interface Message {
 
 export interface Version {
   current: number;
-  min_supported: number;
+  minSupported: number;
 }
 
 function readJson<T>(path: string): T {
   return JSON.parse(readFileSync(path, "utf8")) as T;
 }
 
-/** Reads version.json and checks that 1 <= min_supported <= current. */
+/** Reads version.json and checks that 1 <= minSupported <= current. */
 export function readVersion(): Version {
   const version = readJson<Version>(join(PROTOCOL_DIR, "version.json"));
   if (
     !Number.isInteger(version.current) ||
-    !Number.isInteger(version.min_supported)
+    !Number.isInteger(version.minSupported)
   ) {
-    throw new Error("version.json: current and min_supported must be integers");
+    throw new Error("version.json: current and minSupported must be integers");
   }
-  if (version.min_supported < 1 || version.min_supported > version.current) {
-    throw new Error("version.json: expected 1 <= min_supported <= current");
+  if (version.minSupported < 1 || version.minSupported > version.current) {
+    throw new Error("version.json: expected 1 <= minSupported <= current");
   }
   return version;
 }
@@ -57,8 +57,8 @@ export function toMessage(file: string, schema: Schema): Message {
   if (!meta) {
     throw new Error(`${file}: missing "x-message"`);
   }
-  if (!/^[a-z][a-z0-9]*(_[a-z0-9]+)*$/.test(meta.type)) {
-    throw new Error(`${file}: type "${meta.type}" is not snake_case`);
+  if (!/^[a-z][a-zA-Z0-9]*$/.test(meta.type)) {
+    throw new Error(`${file}: type "${meta.type}" is not camelCase`);
   }
   if (file !== `${meta.type}.schema.json`) {
     throw new Error(`${file}: expected the file name ${meta.type}.schema.json`);
@@ -121,7 +121,7 @@ function typescriptTail(version: Version): string {
 export const PROTOCOL_VERSION = ${version.current};
 
 /** Oldest protocol version the server still accepts. */
-export const MIN_SUPPORTED_PROTOCOL_VERSION = ${version.min_supported};
+export const MIN_SUPPORTED_PROTOCOL_VERSION = ${version.minSupported};
 
 /** The envelope shared by every message. */
 export interface Envelope<T extends string, P> {
@@ -174,7 +174,7 @@ async function main(): Promise<void> {
     const version = readVersion();
     const messages = readMessages();
     console.log(
-      `Protocol version ${version.current} (min supported ${version.min_supported})`,
+      `Protocol version ${version.current} (min supported ${version.minSupported})`,
     );
     for (const direction of ["client", "server"] as const) {
       const types = byDirection(messages, direction).map(
