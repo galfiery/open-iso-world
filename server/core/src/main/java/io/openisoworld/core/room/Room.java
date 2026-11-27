@@ -14,7 +14,6 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 /**
  * The simulation of one room: its grid and the players in it.
@@ -32,9 +31,9 @@ public final class Room {
 
     /** Creates an empty room. Players who enter appear on {@code spawn}, which must be walkable. */
     public Room(String id, Grid grid, Tile spawn) {
-        this.id = Objects.requireNonNull(id, "id");
-        this.grid = Objects.requireNonNull(grid, "grid");
-        this.spawn = Objects.requireNonNull(spawn, "spawn");
+        this.id = id;
+        this.grid = grid;
+        this.spawn = spawn;
         if (!grid.isWalkable(spawn)) {
             throw new IllegalArgumentException("The spawn tile " + spawn + " is not walkable");
         }

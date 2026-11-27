@@ -3,10 +3,17 @@
 [versions]
 spring-boot = "4.1.3"
 archunit = "1.5.1"
+# Null checks at compile time (ADR 0001). Build-time only, nothing reaches the application.
+errorprone = "2.53.0"
+errorprone-plugin = "5.2.0"
+nullaway = "0.14.4"
 
 [libraries]
 spring-boot-bom = { module = "org.springframework.boot:spring-boot-dependencies", version.ref = "spring-boot" }
 archunit-junit5 = { module = "com.tngtech.archunit:archunit-junit5", version.ref = "archunit" }
+errorprone-core = { module = "com.google.errorprone:error_prone_core", version.ref = "errorprone" }
+nullaway = { module = "com.uber.nullaway:nullaway", version.ref = "nullaway" }
 
 [plugins]
 spring-boot = { id = "org.springframework.boot", version.ref = "spring-boot" }
+errorprone = { id = "net.ltgt.errorprone", version.ref = "errorprone-plugin" }

@@ -56,7 +56,8 @@ public final class Pathfinder {
             if (node.tile().equals(goal)) {
                 return Optional.of(pathTo(goal, cameFrom));
             }
-            if (node.cost() > bestCost.get(node.tile())) {
+            Integer best = bestCost.get(node.tile());
+            if (best != null && node.cost() > best) {
                 continue; // A cheaper way to this tile was found after this node was queued.
             }
             for (int[] direction : DIRECTIONS) {
