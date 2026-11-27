@@ -5,7 +5,7 @@ Every message that travels over the WebSocket shares one envelope and is defined
 ## Connecting
 
 ```text
-POST /api/tickets   ──►  ticket (single use, expires in seconds)
+POST /api/tickets   ──►  ticket (single use, valid for 30 seconds)
 GET  /ws?ticket=…   ──►  ticket consumed, session opened
 hello   { protocolVersion, clientVersion? }
 welcome { playerId }
@@ -13,6 +13,10 @@ roomState { … }
 ```
 
 The ticket is part of the REST API, not of this protocol. Every player gets one, guests included, so access tokens never appear in URLs or logs.
+
+- A missing, unknown, expired or used ticket gets `401` on the handshake, and the WebSocket does not open.
+- The first message must be `hello`, within 10 seconds. Before it, any other message gets `invalidMessage`; a second `hello` does too.
+- After an `error` the connection stays open, except for `unsupportedProtocolVersion`.
 
 ## Envelope
 
@@ -32,6 +36,7 @@ Every name in the protocol is camelCase: message types (`moveTo`), field names (
 
 - The client sends one envelope per WebSocket frame.
 - The server sends the events of one tick together: each frame is a JSON array of envelopes, in the order they happened. There is no separate batch message.
+- Every server frame is an array, even with a single message, such as `welcome` or an `error`. A client has one way to read.
 
 ```json
 [
@@ -98,6 +103,19 @@ Coordinates are always grid tiles. Isometric or screen coordinates never appear 
 | `rateLimited`                | Too many commands; about 5 moves per second are allowed                     |
 
 Clients act on `code`; `message` is a short English text for humans and logs.
+
+### Limits and Close Codes
+
+The server closes a connection with one of these codes. The schemas don't describe them, but every client should know them.
+
+| Code | Reason                        | When                                                              |
+| ---- | ----------------------------- | ----------------------------------------------------------------- |
+| 1002 | Unsupported protocol version  | Right after the `error` for a `hello` outside the supported range |
+| 1003 | Binary messages not supported | The client sent a binary frame                                    |
+| 1008 | No hello                      | No `hello` within 10 seconds of opening                           |
+| 1008 | Too many messages             | More than about 20 messages a second                              |
+| 1008 | Too slow                      | The client doesn't read its messages fast enough                  |
+| 1009 | Message too big               | A frame larger than 4 KB                                          |
 
 ## Schemas
 

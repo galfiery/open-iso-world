@@ -46,11 +46,13 @@ The server sends the **whole path once**, not a position every tick. The first t
 ## Connecting
 
 ```text
-POST /api/tickets   →  { "ticket": "…" }        (single use, expires in seconds)
+POST /api/tickets   →  { "ticket": "…" }        (single use, valid for 30 seconds)
 WS   /ws?ticket=…   →  hello { protocolVersion } → welcome + roomState
 ```
 
 Every player gets a ticket first, guests included. Today the server issues it to an anonymous guest. From v0.3 it can also issue one to a logged-in account. The WebSocket side doesn't change, and access tokens never appear in URLs or logs. The ticket is part of the REST API, not of the message protocol.
+
+A missing, unknown, expired or used ticket gets `401` on the handshake, so no WebSocket session exists without one. The player's id comes from the ticket, never from a message.
 
 If the client declares a protocol version the server doesn't support, the server answers with an `error` (`unsupportedProtocolVersion`) and closes the connection.
 
@@ -169,6 +171,28 @@ Grid grid = Grid.parse(
 
 **Time is counted in ticks**, not milliseconds, so game rules are tested tick by tick, without clocks or threads. `RoomLoop` runs on a scheduler owned by `app`, which can run many rooms.
 
+#### Inside `net`
+
+| Package        | What it holds                                                                                               |
+|----------------|-------------------------------------------------------------------------------------------------------------|
+| `net.ticket`   | `TicketStore`: single-use tickets in memory, 30 seconds each, at most 10 000 waiting                         |
+| `net.message`  | `MessageCodec` (frames to messages and back, as strict as the schemas) and `Translator` (core ↔ protocol)    |
+| `net.session`  | The handshake, the session lifecycle, one `Connection` per player and `RoomBroadcaster`, the room's listener |
+| `net.protocol` | The records generated from `protocol/schemas`                                                               |
+
+```text
+client ──frame──► GameWebSocketHandler ──► MessageCodec ──► Translator ──► RoomLoop.submit
+                                                                              │ (tick)
+client ◄──frame── Connection (writer) ◄── RoomBroadcaster ◄── Translator ◄── RoomListener.onTick
+```
+
+- **The tick never waits on the network.** Each `Connection` has a bounded queue and its own virtual thread that writes to the socket. The tick only queues a frame and moves on; a client too slow to read is closed, the room is not slowed down.
+- **`core` decides who receives an event, `net` only routes it.** `RoomBroadcaster` translates each event once, groups the tick's events by player and sends one frame per player.
+- **A player receives broadcasts from their own `roomState` on**, so nobody gets a `path` before knowing what the room looks like.
+- `welcome` comes from `net`, not from the room: it tells the client who it is, which is not a game event. It is queued before the room hears of the player, so it always comes before `roomState`.
+
+`app` wires it together: one room, `lobby` (10 × 10), the ticket endpoint and `/ws`. Spring Security opens only those two and denies everything else; there are no HTTP sessions and no cookies.
+
 ## Client
 
 ```text
@@ -205,6 +229,8 @@ Inside `engine`:
 ## Security in one paragraph
 
 Never trust the client. The server checks every coordinate (inside the room, not blocked), every room access and every chat message, and rate-limits commands per player (about 5 moves per second). Secrets live in `.env`, which is never committed. Passwords are hashed with BCrypt or Argon2, and only hashes of refresh tokens are stored.
+
+The transport protects the server too: frames up to 4 KB, about 20 messages a second per connection, `hello` within 10 seconds, slow readers closed, and only pages from `ALLOWED_ORIGINS` may open the WebSocket. Two limits are known and left for later: there is no cap on the number of connections, and no ping to find connections that died silently.
 
 ## Extending
 
