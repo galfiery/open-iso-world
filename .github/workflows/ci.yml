@@ -40,3 +40,31 @@ jobs:
         run: pnpm --filter protocol typecheck
       - name: Generator and schema tests
         run: pnpm --filter protocol test
+
+  server:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: server
+    steps:
+      - uses: actions/checkout@v7
+      # Gradle runs on this JDK and compiles with it: the build asks for the Java 25 toolchain.
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: 25
+      # Caches Gradle and checks that gradle-wrapper.jar is the official one.
+      # "basic" is the open source (MIT) cache provider, built on actions/cache.
+      - uses: gradle/actions/setup-gradle@v6
+        with:
+          cache-provider: basic
+      - name: Compile with NullAway and run the tests
+        run: ./gradlew test
+      - name: Keep the test reports when a test fails
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: server-test-reports
+          path: server/*/build/reports/tests/test/
+          retention-days: 7
