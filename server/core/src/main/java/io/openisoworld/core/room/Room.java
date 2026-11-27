@@ -96,7 +96,7 @@ public final class Room {
     private void moveTo(MoveTo move, List<Outgoing> events) {
         PlayerState player = players.get(move.playerId());
         if (player == null) {
-            return; // The player left in this same tick.
+            return; // Not in the room: never joined, or already left.
         }
         // Before any other check: even a move to a wrong tile costs a token, and a path search.
         if (!player.moves.tryAcquire(currentTick)) {

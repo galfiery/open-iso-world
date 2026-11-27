@@ -11,7 +11,7 @@ A single room where players walk on a tile grid and see each other move.
 - [x] Monorepo: pnpm workspace, Gradle modules, PostgreSQL in Docker Compose
 - [x] Protocol: `{ "type", "seq", "payload" }` envelope and JSON Schemas for `hello` (with protocol version), `welcome`, `roomState`, `moveTo`, `path`, `playerJoined`, `playerLeft`, `error`
 - [x] Protocol generator: TypeScript types and Java records, `pnpm protocol:gen` and `pnpm protocol:check`
-- [ ] Server core: room grid with blocked tiles, A* pathfinding, ~10 Hz tick loop with a command queue, batched events per tick
+- [x] Server core: room grid with blocked tiles, A* pathfinding, ~10 Hz tick loop with a command queue, batched events per tick
 - [ ] Server net: native WebSocket endpoint, single-use connection ticket issued by REST (anonymous guests use a ticket too)
 - [ ] Server security: validate every coordinate, rate limit of ~5 moves per second per player
 - [ ] Client engine: isometric math, tile and avatar rendering, one depth-sorted layer, integer zoom and `roundPixels`
