@@ -19,3 +19,6 @@ spring:
     locations: classpath:db/migration
 server:
   port: ${SERVER_PORT:8080}
+openisoworld:
+  # Pages that may open the WebSocket, separated by commas. The default is the Vite dev server.
+  allowed-origins: ${ALLOWED_ORIGINS:http://localhost:5173}

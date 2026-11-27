@@ -68,6 +68,11 @@ public final class Connection {
         }
     }
 
+    /** True once the connection is closing: it accepts no more frames. */
+    public boolean isClosing() {
+        return closing;
+    }
+
     /** The session is closed: the writer stops and queued frames are dropped. */
     public void stop() {
         closing = true;

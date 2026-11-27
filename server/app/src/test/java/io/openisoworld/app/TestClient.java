@@ -14,6 +14,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
+import org.jspecify.annotations.Nullable;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.json.JsonMapper;
 
@@ -35,11 +36,13 @@ final class TestClient implements AutoCloseable {
     private final StringBuilder partial = new StringBuilder();
     private int nextSeq = 1;
 
-    private TestClient(URI uri, Duration timeout) {
-        this.socket = HTTP.newWebSocketBuilder()
-                .connectTimeout(timeout)
-                .buildAsync(uri, new Listener())
-                .orTimeout(timeout.toMillis(), TimeUnit.MILLISECONDS)
+    private TestClient(URI uri, @Nullable String origin) {
+        WebSocket.Builder builder = HTTP.newWebSocketBuilder().connectTimeout(WAIT);
+        if (origin != null) {
+            builder.header("Origin", origin); // what a browser sends; other clients send none
+        }
+        this.socket = builder.buildAsync(uri, new Listener())
+                .orTimeout(WAIT.toMillis(), TimeUnit.MILLISECONDS)
                 .join();
     }
 
@@ -57,7 +60,12 @@ final class TestClient implements AutoCloseable {
 
     /** Opens the WebSocket with this ticket; fails with the handshake's error if it is refused. */
     static TestClient open(int port, String ticket) {
-        return new TestClient(URI.create("ws://localhost:" + port + "/ws?ticket=" + ticket), WAIT);
+        return open(port, ticket, null);
+    }
+
+    /** Opens the WebSocket as a page from this origin would. */
+    static TestClient open(int port, String ticket, @Nullable String origin) {
+        return new TestClient(URI.create("ws://localhost:" + port + "/ws?ticket=" + ticket), origin);
     }
 
     /** A new guest with a fresh ticket, connected but not greeted yet. */

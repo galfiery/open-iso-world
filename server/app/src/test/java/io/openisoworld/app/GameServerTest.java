@@ -190,6 +190,41 @@ class GameServerTest {
         }
     }
 
+    // Limits
+
+    @Test
+    void closesAConnectionThatSendsATooLargeFrame() throws Exception {
+        try (TestClient client = TestClient.enter(port)) {
+            client.sendRaw("{\"type\":\"hello\",\"seq\":2,\"payload\":{\"clientVersion\":\"" + "x".repeat(5 * 1024) + "\"}}");
+
+            assertEquals(1009, client.awaitClose());
+        }
+    }
+
+    @Test
+    void acceptsAPageFromAnAllowedOrigin() throws Exception {
+        try (TestClient client = TestClient.open(port, TestClient.ticket(port), "http://localhost:5173")) {
+            client.send("hello", HELLO);
+            client.await("welcome");
+        }
+    }
+
+    @Test
+    void refusesAPageFromAnotherOriginWithoutBurningTheTicket() throws Exception {
+        String ticket = TestClient.ticket(port);
+
+        CompletionException refused = assertThrows(
+                CompletionException.class, () -> TestClient.open(port, ticket, "https://example.com"));
+        assertEquals(403, assertInstanceOf(WebSocketHandshakeException.class, refused.getCause())
+                .getResponse()
+                .statusCode());
+
+        try (TestClient client = TestClient.open(port, ticket, "http://localhost:5173")) {
+            client.send("hello", HELLO);
+            client.await("welcome");
+        }
+    }
+
     // HTTP security
 
     @Test
