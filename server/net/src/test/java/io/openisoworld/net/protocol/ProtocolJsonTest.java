@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import io.openisoworld.net.message.MessageCodec;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -13,19 +14,14 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import tools.jackson.core.JacksonException;
-import tools.jackson.databind.DeserializationFeature;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.json.JsonMapper;
 
 /** Checks that the records generated from protocol/schemas read and write the JSON of the schemas. */
 class ProtocolJsonTest {
 
-    // The WebSocket must use the same settings. In Jackson 3 FAIL_ON_UNKNOWN_PROPERTIES is off by
-    // default: without it, a field the schema does not allow would pass silently.
-    private static final JsonMapper MAPPER = JsonMapper.builder()
-            .enable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
-            .enable(DeserializationFeature.FAIL_ON_NULL_FOR_PRIMITIVES)
-            .build();
+    // The mapper of the WebSocket itself, so these tests check the settings the server really uses.
+    private static final JsonMapper MAPPER = MessageCodec.mapper();
 
     /** Lets the JSON of the tests use single quotes: {'x': 1} becomes {"x": 1}. */
     private static String json(String singleQuoted) {
