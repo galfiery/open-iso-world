@@ -39,6 +39,7 @@ public final class Room {
     private final Grid grid;
     private final Tile spawn;
     private final Map<String, PlayerState> players = new LinkedHashMap<>(); // in order of entry
+    private long currentTick; // counts the ticks: the room's clock
 
     /** Creates an empty room. Players who enter appear on {@code spawn}, which must be walkable. */
     public Room(String id, Grid grid, Tile spawn) {
@@ -55,6 +56,7 @@ public final class Room {
      * this tick's events, in order.
      */
     public List<Outgoing> tick(List<Command> commands) {
+        currentTick++;
         // Steps produce no events: clients are already animating the paths they received.
         players.values().forEach(PlayerState::advance);
 
@@ -73,7 +75,7 @@ public final class Room {
         if (players.containsKey(playerId)) {
             return; // A bug in the transport, not something the client did: ignore it.
         }
-        PlayerState player = new PlayerState(playerId, spawn);
+        PlayerState player = new PlayerState(playerId, spawn, currentTick);
         players.put(playerId, player);
         events.add(new Outgoing(new OnlyPlayer(playerId), snapshot()));
         if (players.size() > 1) { // Nobody else to tell when the room was empty.
@@ -91,6 +93,11 @@ public final class Room {
         PlayerState player = players.get(move.playerId());
         if (player == null) {
             return; // The player left in this same tick.
+        }
+        // Before any other check: even a move to a wrong tile costs a token, and a path search.
+        if (!player.moves.tryAcquire(currentTick)) {
+            events.add(rejection(move, Reason.RATE_LIMITED));
+            return;
         }
         Tile target = move.target();
         if (!grid.contains(target)) {
@@ -129,10 +136,12 @@ public final class Room {
         private Tile position; // the last tile reached
         private final Deque<Tile> path = new ArrayDeque<>(); // the tiles still to walk; empty when standing
         private int ticksToNextStep;
+        private final MoveRateLimiter moves;
 
-        PlayerState(String id, Tile position) {
+        PlayerState(String id, Tile position, long tick) {
             this.id = id;
             this.position = position;
+            this.moves = new MoveRateLimiter(tick);
         }
 
         boolean isWalking() {

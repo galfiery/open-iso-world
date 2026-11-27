@@ -36,11 +36,15 @@ public sealed interface RoomEvent {
     /** A move was refused. {@code seq} is the number of the client message that asked for it. */
     record MoveRejected(String playerId, Reason reason, int seq) implements RoomEvent {
 
-        /** Why the move was refused. The protocol reports all three as {@code invalidTile}. */
+        /**
+         * Why the move was refused. The protocol reports the first three as {@code invalidTile}
+         * and the last as {@code rateLimited}.
+         */
         public enum Reason {
             OUTSIDE_ROOM,
             BLOCKED,
-            UNREACHABLE
+            UNREACHABLE,
+            RATE_LIMITED
         }
     }
 }

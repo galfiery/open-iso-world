@@ -254,6 +254,64 @@ class RoomTest {
         assertEquals(new Tile(1, 0), players.get("p-2").position());
     }
 
+    // Rate limit
+
+    @Test
+    void refusesTheSixthMoveInATick() {
+        room.tick(List.of(new Join("p-1")));
+
+        List<Outgoing> events = room.tick(List.of(
+                new MoveTo("p-1", new Tile(3, 0), 1),
+                new MoveTo("p-1", new Tile(0, 2), 2),
+                new MoveTo("p-1", new Tile(3, 0), 3),
+                new MoveTo("p-1", new Tile(0, 2), 4),
+                new MoveTo("p-1", new Tile(3, 0), 5),
+                new MoveTo("p-1", new Tile(0, 2), 6)));
+
+        assertEquals(6, events.size());
+        assertTrue(events.subList(0, 5).stream().allMatch(outgoing -> outgoing.event() instanceof PathStarted));
+        assertEquals(
+                new Outgoing(new OnlyPlayer("p-1"), new MoveRejected("p-1", Reason.RATE_LIMITED, 6)),
+                events.get(5));
+    }
+
+    @Test
+    void eachPlayerHasTheirOwnLimit() {
+        room.tick(List.of(new Join("p-1"), new Join("p-2")));
+        room.tick(fiveMoves("p-1"));
+
+        List<Outgoing> events = room.tick(List.of(new MoveTo("p-2", new Tile(3, 0), 1)));
+
+        assertTrue(events.getFirst().event() instanceof PathStarted);
+    }
+
+    @Test
+    void aMoveToAWrongTileCostsAToken() {
+        room.tick(List.of(new Join("p-1")));
+        Tile blocked = new Tile(1, 1);
+        room.tick(List.of(
+                new MoveTo("p-1", blocked, 1),
+                new MoveTo("p-1", blocked, 2),
+                new MoveTo("p-1", blocked, 3),
+                new MoveTo("p-1", blocked, 4),
+                new MoveTo("p-1", blocked, 5)));
+
+        List<Outgoing> events = room.tick(List.of(new MoveTo("p-1", new Tile(3, 0), 6)));
+
+        assertEquals(new MoveRejected("p-1", Reason.RATE_LIMITED, 6), events.getFirst().event());
+    }
+
+    @Test
+    void aTokenComesBackAfterTwoTicks() {
+        room.tick(List.of(new Join("p-1")));
+        room.tick(fiveMoves("p-1"));
+
+        List<Outgoing> events = room.tick(List.of(new MoveTo("p-1", new Tile(3, 0), 6)));
+        assertTrue(events.getFirst().event() instanceof MoveRejected); // one tick later
+        events = room.tick(List.of(new MoveTo("p-1", new Tile(3, 0), 7)));
+        assertTrue(events.getFirst().event() instanceof PathStarted); // two ticks later
+    }
+
     // Helpers
 
     private static PlayerView standing(String playerId) {
@@ -267,6 +325,15 @@ class RoomTest {
     }
 
     private int observers;
+
+    private static List<Command> fiveMoves(String playerId) {
+        return List.of(
+                new MoveTo(playerId, new Tile(3, 0), 1),
+                new MoveTo(playerId, new Tile(0, 2), 2),
+                new MoveTo(playerId, new Tile(3, 0), 3),
+                new MoveTo(playerId, new Tile(0, 2), 4),
+                new MoveTo(playerId, new Tile(3, 0), 5));
+    }
 
     private void idle(int ticks) {
         for (int i = 0; i < ticks; i++) {
