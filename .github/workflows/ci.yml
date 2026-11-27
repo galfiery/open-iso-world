@@ -68,3 +68,23 @@ jobs:
           name: server-test-reports
           path: server/*/build/reports/tests/test/
           retention-days: 7
+
+  client:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      # These scripts are placeholders until the client is set up; the job is ready for them.
+      - name: Lint
+        run: pnpm --filter open-iso-world-client lint
+      - name: Unit tests
+        run: pnpm --filter open-iso-world-client test
+      - name: Build
+        run: pnpm --filter open-iso-world-client build
