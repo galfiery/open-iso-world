@@ -28,4 +28,6 @@ These systems are on the [roadmap](Roadmap.md) but do not exist yet: the room en
 
 ## Decisions
 
-The [architectural decision records](adr/) explain why things are as they are. There are none yet.
+The [architectural decision records](adr/) explain why things are as they are.
+
+- [ADR 0001: Null safety with JSpecify and NullAway](adr/0001-null-safety-with-jspecify-and-nullaway.md)

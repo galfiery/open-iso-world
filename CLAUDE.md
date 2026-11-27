@@ -24,6 +24,7 @@ Out of scope: shop, inventory, economy, avatar skins.
 - Client: TypeScript 6.0, React 19, Vite 8, PixiJS 8, Zustand 5, TanStack Query 5
 - Runtime and tooling: Node.js 26, pnpm 12, ESLint 10 + eslint-plugin-boundaries, Prettier, Docker Compose
 - Protocol: JSON Schema, with generated TypeScript types and Java records
+- Null safety: JSpecify annotations, checked at compile time by NullAway on Error Prone ([ADR 0001](docs/adr/0001-null-safety-with-jspecify-and-nullaway.md))
 - Testing: JUnit 6, ArchUnit, Testcontainers, Vitest, Playwright, Gatling
 
 Always respect the existing dependencies and versions. Java library versions come from the Spring Boot BOM.
@@ -103,6 +104,7 @@ Use the existing scripts and Gradle tasks whenever possible.
 - All names in code are in English.
 - TypeScript strict mode; prefer explicit types over `any`.
 - Java: packages lowercase and singular, classes named by role (`RoomManager`, `RoomController`).
+- Java: every package of handwritten code is `@NullMarked` in its `package-info.java`; mark with `@Nullable` only what may be null, and don't add `Objects.requireNonNull` where NullAway already checks. Generated protocol code keeps its runtime checks.
 - React components in PascalCase, one per file; other TypeScript modules in camelCase.
 - Protocol message types, field names and enum values in camelCase, with schema files named after the type in kebab-case (`player-joined.schema.json`); tables and columns in snake_case; migrations as `V<number>__<description>.sql`.
 - Keep functions small and files short: this is an example project and should read easily.
