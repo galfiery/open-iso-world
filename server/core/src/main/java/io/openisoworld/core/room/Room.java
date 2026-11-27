@@ -51,6 +51,10 @@ public final class Room {
         }
     }
 
+    public String id() {
+        return id;
+    }
+
     /**
      * Moves the walking players, applies the commands received since the last tick and returns
      * this tick's events, in order.
