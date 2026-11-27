@@ -36,7 +36,7 @@ Three rules shape everything else:
 1. Player clicks a tile        engine/input turns the click into (x, y)
 2. Client sends intention      { "type": "moveTo", "seq": 12, "payload": { "x": 4, "y": 7 } }
 3. Server queues the command   net puts it in the room's command queue
-4. Next tick (~100 ms)         core validates the tile, rate-limits, runs A* around blocked tiles
+4. Next tick (~100 ms)         core rate-limits, validates the tile, runs A* around blocked tiles
 5. Server broadcasts the path  { "type": "path", "payload": { "playerId": "...", "tiles": [{ "x": 3, "y": 7 }, { "x": 4, "y": 7 }] } }
 6. Every client animates it    game interpolates tile by tile, engine draws it depth-sorted
 ```
@@ -133,10 +133,41 @@ Each active room lives in memory with its own command queue and a tick loop at ~
 
 ```text
 every tick:
-  drain command queue  →  validate & apply  →  collect events  →  send one batch to the room
+  advance walking players  →  drain command queue  →  validate & apply  →  send one batch to the room
 ```
 
 A room runs on one thread at a time, so game state needs no locks. The tick loop **never waits on the database**: anything slow happens outside it and comes back as a command.
+
+#### Inside `core`
+
+| Package     | What it holds                                                                                 |
+|-------------|-----------------------------------------------------------------------------------------------|
+| `core.grid` | `Tile`, `Grid` (size and blocked tiles) and `Pathfinder` (A*). No players, no time            |
+| `core.room` | `Room` (the simulation), `RoomLoop` (the clock and the command queue), commands and events    |
+
+**Commands in, events out.** `net` hands commands (`Join`, `Leave`, `MoveTo`) to `RoomLoop.submit` from any thread. Once per tick, `RoomListener.onTick` receives all the events of that tick, in order. Each event says who receives it: everyone, one player, or everyone but one. Who sees what is a game rule, so `core` decides it and `net` only groups the events by session.
+
+**A grid is a drawing.** `.` is floor and `#` is blocked; the first row is `y = 0`:
+
+```java
+Grid grid = Grid.parse(
+        "......",
+        "..##..",
+        "......");
+```
+
+**Movement rules.**
+
+- Players move in 8 directions, and a diagonal step never cuts the corner of a blocked tile.
+- A* is deterministic: the same click always gives the same path.
+- One step takes 5 ticks, so players walk 2 tiles a second, diagonals included. Steps produce no events: clients animate the path they received.
+- A new goal while walking starts from the tile the step in progress reaches, so nobody jumps back.
+- Players don't block each other.
+- A tile outside the room, blocked or unreachable is refused; the protocol reports all three as `invalidTile`.
+
+**Rate limit.** Each player has a bucket of 5 moves that refills by one every 2 ticks, about 5 moves a second. Every `moveTo` costs one, even a refused one.
+
+**Time is counted in ticks**, not milliseconds, so game rules are tested tick by tick, without clocks or threads. `RoomLoop` runs on a scheduler owned by `app`, which can run many rooms.
 
 ## Client
 

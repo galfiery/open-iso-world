@@ -24,8 +24,10 @@ Start with the [Architecture Overview](Architecture/Overview.md), then follow th
 
 ## Not documented yet
 
-These systems are on the [roadmap](Roadmap.md) but do not exist yet: the room engine (grid, A* pathfinding, tick loop), the WebSocket transport and tickets, the client engine (isometric rendering, camera, input), chat and multiple rooms (v0.2), accounts and rooms in the database (v0.3), and the example bot. Each gets its page when it is built.
+These systems are on the [roadmap](Roadmap.md) but do not exist yet: the WebSocket transport and tickets, the client engine (isometric rendering, camera, input), chat and multiple rooms (v0.2), accounts and rooms in the database (v0.3), and the example bot. Each gets its page when it is built.
 
 ## Decisions
 
-The [architectural decision records](adr/) explain why things are as they are. There are none yet.
+The [architectural decision records](adr/) explain why things are as they are.
+
+- [ADR 0001: Null safety with JSpecify and NullAway](adr/0001-null-safety-with-jspecify-and-nullaway.md)
