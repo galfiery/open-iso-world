@@ -1,6 +1,5 @@
 # 1. Null safety with JSpecify and NullAway
 
-- **Status:** Proposed
 - **Date:** 2026-11-27
 - **Scope:** server (all Gradle modules)
 
@@ -78,7 +77,7 @@ and `new Leave(null)` does not compile.
 
 ## Implementation
 
-After this ADR is accepted, as a separate commit on the branch where it is accepted:
+In its own commit, before any new code relies on it:
 
 | File | Change |
 |------|--------|
@@ -90,5 +89,3 @@ After this ADR is accepted, as a separate commit on the branch where it is accep
 | `server/core/src/main/java/io/openisoworld/core/**` | Remove `Objects.requireNonNull` and the compact constructors that exist only for it. Keep `List.copyOf` |
 | `server/core/src/main/java/io/openisoworld/core/grid/Pathfinder.java` | NullAway reports one real case: the result of `Map.get` is unboxed without a check. Handle the missing entry explicitly |
 | `CLAUDE.md`, `docs/Home.md` | Add JSpecify and NullAway to the tech stack; the ADR list is no longer empty |
-
-The status of this ADR then becomes **Accepted**.
