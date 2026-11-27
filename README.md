@@ -1,5 +1,7 @@
 # open-iso-world
 
+[![CI](https://github.com/galfiery/open-iso-world/actions/workflows/ci.yml/badge.svg?branch=develop)](https://github.com/galfiery/open-iso-world/actions/workflows/ci.yml?query=branch%3Adevelop)
+
 A minimal, full-stack, open source example of real-time multiplayer isometric rooms: players walk on a tile grid, see each other move and chat. It is meant as a small, readable reference that others can run, study, fork and extend. The server is authoritative: the browser only sends intentions and draws what the server says.
 
 > open-iso-world is in early development, working on milestone v0.1 (One room). The monorepo, the database setup and the message protocol (version 1) are in place; the game itself is not playable yet. See the [roadmap](docs/ROADMAP.md) for what comes next.

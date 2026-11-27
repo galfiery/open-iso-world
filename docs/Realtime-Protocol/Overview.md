@@ -130,7 +130,7 @@ The server validates in two steps: the frame against the envelope, then the payl
 
 Each payload is named after its schema's `title` plus `Payload`. The Java records check required fields and limits in their constructors and copy lists, so a record that exists is always valid. The generator refuses schema keywords it cannot translate, instead of ignoring them.
 
-The generated files are committed and start with a "Do not edit" notice. `pnpm protocol:check` generates the code in memory and compares it with the files on disk: it fails if one is changed, missing or no longer generated. The CI planned for v0.1 will run it, so that a schema change without regeneration cannot be merged. `pnpm --filter protocol test` tests the generator and checks every schema against valid and invalid examples.
+The generated files are committed and start with a "Do not edit" notice. `pnpm protocol:check` generates the code in memory and compares it with the files on disk: it fails if one is changed, missing or no longer generated. CI runs it on every pull request, so that a schema change without regeneration cannot be merged. `pnpm --filter protocol test` tests the generator and checks every schema against valid and invalid examples.
 
 ## Adding a Message
 
