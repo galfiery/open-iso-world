@@ -19,7 +19,7 @@ A single room where players walk on a tile grid and see each other move.
 - [ ] Client input: click to tile, send `moveTo`
 - [ ] ArchUnit and eslint-plugin-boundaries rules for the layers
 - [ ] Docker Compose `full` profile (db, server, client)
-- [ ] CI on GitHub Actions: protocol check, server tests, client lint, tests and build
+- [x] CI on GitHub Actions: protocol check, server tests, client lint, tests and build
 
 ## v0.2 Social
 

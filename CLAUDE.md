@@ -124,7 +124,7 @@ Use the existing scripts and Gradle tasks whenever possible.
 
 - Add or update tests for new functionality; a bug fix gets a test that fails before the fix.
 - Run the relevant tests after modifications.
-- CI runs the protocol check, server tests and client lint, tests and build; it must be green.
+- CI runs the protocol check and tests, server tests and client lint, tests and build; it must be green.
 - Do not disable or weaken tests, ArchUnit rules or lint rules to make the build pass.
 - Include edge cases, such as blocked tiles, room borders and rate limits.
 
