@@ -1,0 +1,42 @@
+# Continuous integration: runs on every pull request and on pushes to the long-lived branches.
+# Each step mirrors a command from CLAUDE.md, so a red check can be reproduced locally.
+#
+# Actions are pinned to their major version to keep this file readable. A production project
+# may prefer pinning each action to a full commit SHA, kept up to date by Dependabot.
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [develop, master]
+
+# The workflow only reads the code.
+permissions:
+  contents: read
+
+# A new push to the same branch or pull request cancels the run still in progress.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  protocol:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      # Installs the pnpm version from "packageManager" in package.json.
+      # It must come before setup-node, which needs pnpm for its cache.
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Generated code is up to date
+        run: pnpm protocol:check
+      - name: Type check
+        run: pnpm --filter protocol typecheck
+      - name: Generator and schema tests
+        run: pnpm --filter protocol test
